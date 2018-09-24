@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -50,7 +51,7 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="lots o testing Basic: Linear OpMode", group="Linear Opmode")
+@TeleOp(name="Basic: Linear Opmode", group="Linear Opmode")
 //@Disabled
 public class lotsotestingbasicopmode extends LinearOpMode {
 
@@ -58,6 +59,8 @@ public class lotsotestingbasicopmode extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
+    private DcMotor Arm_joint = null;
+    int speed = 1;
 
     @Override
     public void runOpMode() {
@@ -69,11 +72,13 @@ public class lotsotestingbasicopmode extends LinearOpMode {
         // step (using the FTC Robot Controller app on the phone).
         leftDrive  = hardwareMap.get(DcMotor.class, "LD");
         rightDrive = hardwareMap.get(DcMotor.class, "RD");
+        Arm_joint = hardwareMap.get (DcMotor.class, "Mineral_Arm");
+
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        leftDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightDrive.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -91,26 +96,44 @@ public class lotsotestingbasicopmode extends LinearOpMode {
 
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight.
-           // double drive = -gamepad1.left_stick_y;
-           // double turn  =  gamepad1.right_stick_x;
+            // double drive = -gamepad1.left_stick_y;
+            // double turn  =  gamepad1.right_stick_x;
             //leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
             //rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
 
             // Tank Mode uses one stick to control each wheel.
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
-            leftPower  = -gamepad1.left_stick_y ;
-            rightPower = -gamepad1.right_stick_y ;
+
             //leftpower =Range.clip(drive + turn, -1.0, 1.0) ;
             //rightpoer =Range.clip(drive - turn, -1.0, 1.0) ;
 
             // Send calculated power to wheels
+
+            if (gamepad1.dpad_down) {
+                speed = 3;
+            } else if (gamepad1.dpad_up) {
+                speed = 1;
+            }
+            leftPower = -gamepad1.left_stick_y / speed;
+            rightPower = -gamepad1.right_stick_y / speed;
+
             leftDrive.setPower(leftPower);
             rightDrive.setPower(rightPower);
 
+            if (gamepad2.right_trigger > 0.5) {
+                Arm_joint.setPower(1);
+            } else if (gamepad2.left_trigger > 0.5) {
+                Arm_joint.setPower(-1);
+            } else {
+                Arm_joint.setPower(0);
+            }
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+            telemetry.addData("Mineral_Arm", Arm_joint.getPower());
             telemetry.update();
         }
+        }
     }
-}
+
