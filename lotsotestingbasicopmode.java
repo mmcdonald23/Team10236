@@ -121,9 +121,9 @@ public class lotsotestingbasicopmode extends LinearOpMode {
             rightDrive.setPower(rightPower);
 
             if (gamepad2.right_trigger > 0.5) {
-                Arm_joint.setPower(1);
+                Arm_joint.setPower(0.25);
             } else if (gamepad2.left_trigger > 0.5) {
-                Arm_joint.setPower(-1);
+                Arm_joint.setPower(-0.25);
             } else {
                 Arm_joint.setPower(0);
             }
